@@ -1,0 +1,53 @@
+## 2016
+
+### 07 Avril
+
+Experience utiliser Autoit comme interface utilisateur pour une application en Go sous windows
+
+Autoit
+```autoit
+#include <TCP.au3>
+```
+
+Golang
+```golang
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"net"
+	"os"
+)
+
+func main() {
+	// connect to this socket
+	conn, _ := net.Dial("tcp", "127.0.0.1:8081")
+
+	// comme on ne met pas de @LF dans le serveur alors je dois recuperer le message dans un tableau de byte
+	var msg = make([]byte, 512)
+	s, err := conn.Read(msg) // s contient la taille du message retournÃ© et msg le message sur 512 bytes rempli avec des 0 de mantisse si le message est plus court
+	if err != nil {
+		fmt.Printf("Erreur fatale %q", err)
+	}
+
+	fmt.Println("message : ", string(msg[:s])) // permet de convertir en chaine et de limiter le resultat a la longueur de la chaine
+
+	// si on met un @LF dans les message serveur alors on peut utiliser la ligne suivante
+	//message_login, _ := bufio.NewReader(conn).ReadString('\n')
+	//fmt.Printf("Message form server %s \n", message_login)
+	for {
+
+		// read in input from stdin
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Test to send:")
+		text, _ := reader.ReadString('\n')
+		// send to socket
+		fmt.Fprintf(conn, text+"\n")
+		//listen to the reply
+		message, _ := bufio.NewReader(conn).ReadString('\n')
+		fmt.Printf("Message form server %s \n", message)
+	}
+}
+```
+created with help of [Markdown Edit](http://georgeosddev.github.io/markdown-edit/)
